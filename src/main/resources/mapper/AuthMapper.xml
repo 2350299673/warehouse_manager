@@ -11,6 +11,14 @@
         and t3.auth_state = 1 and t3.auth_type != 3
         and t1.user_id = #{userId}
     </select>
+
+<!--    //查询所有的权限菜单
+    public List<Auth> findAllAuth();-->
+    <select id="findAllAuth" resultType="auth">
+        select * from auth_info where auth_state = 1 and auth_type != 3
+    </select>
+
+
 </mapper>
 
 

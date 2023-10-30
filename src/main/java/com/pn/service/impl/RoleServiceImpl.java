@@ -1,15 +1,21 @@
 package com.pn.service.impl;
 
+import com.pn.dto.AssignAuthDto;
+import com.pn.mapper.AuthMapper;
+import com.pn.mapper.RoleAuthMapper;
 import com.pn.mapper.RoleMapper;
 import com.pn.page.Page;
+import com.pn.pojo.Auth;
 import com.pn.pojo.Result;
 import com.pn.pojo.Role;
+import com.pn.pojo.RoleAuth;
 import com.pn.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -74,13 +80,40 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @CacheEvict(key = "'all:role'")//清除缓存
+    @Transactional
     @Override
     public Result deleteRole(Integer roleId) {
         int i = roleMapper.deleteRole(roleId);
         if (i>0){
+            //删除角色权限关系
+            roleAuthMapper.removeRoleAuthByRid(roleId);
             return Result.ok("删除角色成功！");
         }
         return Result.err(Result.CODE_ERR_BUSINESS,"删除角色失败！");
+    }
+
+    @Autowired
+    private RoleAuthMapper roleAuthMapper;
+
+    @Override
+    public List<Integer> queryAuthByRoleIds(Integer roleId) {
+        return roleAuthMapper.findAuthIdsByRid(roleId);
+    }
+
+    //给角色分配权限的业务方法
+    @Transactional
+    @Override
+    public void saveRoleAuth(AssignAuthDto assignAuthDto) {
+        //删除角色之前分配的所有权限
+        roleAuthMapper.removeRoleAuthByRid(assignAuthDto.getRoleId());
+        List<Integer> authIds = assignAuthDto.getAuthIds();
+        for (Integer authId : authIds) {
+            RoleAuth roleAuth = new RoleAuth();
+            roleAuth.setRoleId(assignAuthDto.getRoleId());
+            roleAuth.setAuthId(authId);
+            roleAuthMapper.insertRoleAuth(roleAuth);
+        }
+
     }
 
 }

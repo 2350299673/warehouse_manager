@@ -5,13 +5,17 @@ import com.pn.mapper.AuthMapper;
 import com.pn.pojo.Auth;
 import com.pn.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//指定缓存的名称(缓存的键的前缀，一般是标注注解的类的全路径)
+@CacheConfig(cacheNames = "com.pn.service.impl.AuthServiceImpl")
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -44,6 +48,8 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+
+
     //通过递归算法把用户权限下的所有菜单转成菜单树
     private List<Auth> allAuthToAuthTree(List<Auth> allAuthTree,Integer pid){
         //创建一个存放一级菜单的集合
@@ -59,5 +65,15 @@ public class AuthServiceImpl implements AuthService {
             firstAuth.setChildAuth(secondAuthList);
         }
         return firstLevelAuthTree;
+    }
+
+    @Cacheable(key = "'all:authTree'")
+    @Override
+    public List<Auth> allAuthTree() {
+        List<Auth> allAuth = authMapper.findAllAuth();
+        //将所有权限菜单转成权限菜单树list
+        List<Auth> list = allAuthToAuthTree(allAuth, 0);
+
+        return list;
     }
 }

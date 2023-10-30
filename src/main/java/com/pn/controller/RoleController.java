@@ -1,6 +1,8 @@
 package com.pn.controller;
 
+import com.pn.dto.AssignAuthDto;
 import com.pn.page.Page;
+import com.pn.pojo.Auth;
 import com.pn.pojo.CurrentUser;
 import com.pn.pojo.Result;
 import com.pn.pojo.Role;
@@ -64,5 +66,19 @@ public class RoleController {
     public Result deleteRole(@PathVariable Integer roleId){
         Result result = roleService.deleteRole(roleId);
         return result;
+    }
+
+    ///role-auth?roleId=18 -- 根据用户id查询用户已分配的权限菜单
+    @RequestMapping("/role-auth")
+    public Result roleAuth(Integer roleId){
+        List<Integer> integerList = roleService.queryAuthByRoleIds(roleId);
+        return Result.ok(integerList);
+    }
+
+    //给角色分配菜单权限的url -- /role/auth-grant
+    @RequestMapping("/auth-grant")
+    public Result authGrant(@RequestBody AssignAuthDto assignAuthDto){
+        roleService.saveRoleAuth(assignAuthDto);
+        return Result.ok("权限分配成功！");
     }
 }

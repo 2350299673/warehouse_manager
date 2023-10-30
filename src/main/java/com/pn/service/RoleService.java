@@ -1,6 +1,8 @@
 package com.pn.service;
 
+import com.pn.dto.AssignAuthDto;
 import com.pn.page.Page;
+import com.pn.pojo.Auth;
 import com.pn.pojo.Result;
 import com.pn.pojo.Role;
 
@@ -25,4 +27,10 @@ public interface RoleService {
 
     //根据用户id删除角色
     public Result deleteRole(Integer roleId);
+
+    //查询角色分配的所有权限菜单的id的业务方法
+    public List<Integer> queryAuthByRoleIds(Integer roleId);
+
+    //给角色分配权限的业务方法
+    public void saveRoleAuth(AssignAuthDto assignAuthDto);
 }
