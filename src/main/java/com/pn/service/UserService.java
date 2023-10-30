@@ -3,6 +3,7 @@ package com.pn.service;
 import com.pn.dto.AssignRoleDto;
 import com.pn.page.Page;
 import com.pn.pojo.Result;
+import com.pn.pojo.Role;
 import com.pn.pojo.User;
 
 import java.util.List;

@@ -20,7 +20,57 @@
         select role_id from role where role_name = #{roleName}
     </select>
 
+<!--    查询角色行数的方法-->
+    <select id="findRoleRowCount" resultType="integer">
+        select count(*) from role
+        <where>
+            <if test="roleName != null and roleName != '' ">
+                and role_name like concat('%',#{roleName},'%')
+            </if>
+            <if test="roleCode != null and roleCode != ''">
+                and role_code like concat('%',#{roleCode},'%')
+            </if>
+            <if test="roleState != null and roleState != ''">
+                and role_state = #{roleState}
+            </if>
+        </where>
+    </select>
 
+    <!--分页查询角色的方法-->
+    <select id="findRolePage" resultType="role">
+        select t1.*,t2.user_code getCode
+        from role t1 , user_info t2
+        where t1.create_by = t2.user_id
+        <if test="role.roleName != null and role.roleName != '' ">
+            and t1.role_name like concat('%',#{role.roleName},'%')
+        </if>
+        <if test="role.roleCode != null and role.roleCode != ''">
+            and t1.role_code like concat('%',#{role.roleCode},'%')
+        </if>
+        <if test="role.roleState != null and role.roleState != ''">
+            and t1.role_state = #{role.roleState}
+        </if>
+        order by t1.create_time desc
+        limit #{page.limitIndex},#{page.pageSize}
+    </select>
+
+    <select id="findRoleByNameOrCode" resultType="role">
+        select * from role where role_name = #{param1} or role_code = #{param2}
+    </select>
+<!--    添加角色-->
+    <insert id="insertRole">
+        insert into role values (null,#{roleName},#{roleDesc},#{roleCode},0,#{createBy},now(),null,null)
+    </insert>
+
+<!--    根据用户id启用或禁用角色-->
+    <update id="setRoleStateByRoleId">
+        update role set role_state = #{roleState} where role_id = #{roleId}
+    </update>
+
+<!--    根据用户id删除角色-->
+    <delete id="deleteRole">
+        delete from role where role_id = #{roleId}
+    </delete>
 </mapper>
 
 
